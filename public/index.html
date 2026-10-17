@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Constellation of Strangers' Dreams</title>
+<meta name="description" content="An anonymous dream journal where every submitted dream becomes a star in a navigable galaxy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+</head>
+<body>
+<canvas id="galaxy" aria-label="Globe of dreams — drag to rotate the globe, scroll to zoom, click a star to rotate it to you and read its dream"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<div id="loader" class="loader" role="status" aria-label="Loading the universe">
+  <div class="loader-globe"><span class="orbit o1"></span><span class="orbit o2"></span><span class="core-star">✦</span></div>
+  <p>Summoning the universe…</p>
+</div>
+
+<header class="hud top panel">
+  <div class="brand">
+    <div class="brand-mark">✦</div>
+    <div>
+      <h1>Constellation of Strangers' Dreams</h1>
+      <p id="statsLine">Loading the night sky…</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="zoomIn" class="btn ghost" type="button">+ Closer</button>
+    <button id="zoomOut" class="btn ghost round" type="button" aria-label="Zoom out">−</button>
+    <button id="resetView" class="btn ghost" type="button">⌂ Reset view</button>
+    <span id="livePill" class="live-pill connecting" title="Live sky status"><span class="live-dot"></span><span id="liveText">Connecting…</span></span>
+    <button id="releaseBtn" class="btn primary" type="button">+ Release a dream</button>
+  </div>
+</header>
+
+<div class="row2 panel">
+  <nav id="moodBar" class="mood-bar" aria-label="Filter by mood constellation"></nav>
+  <div class="row2-right">
+    <input id="search" type="search" placeholder="Search the subconscious…" aria-label="Search dreams">
+    <button id="surpriseBtn" class="btn ghost round" type="button" title="Surprise me — fly to a random dream" aria-label="Surprise me">🎲</button>
+    <div class="segmented" role="group" aria-label="View">
+      <button id="segUniverse" class="seg active" type="button">✦ Universe</button>
+      <button id="segRiver" class="seg" type="button">≋ Dream Current</button>
+    </div>
+  </div>
+</div>
+
+<section id="emptySky" class="empty-sky" hidden>
+  <div class="empty-card">
+    <div class="empty-icon">🌌</div>
+    <h2>The sky is quiet —<br>be the first star.</h2>
+    <p>No dreams have been released yet. Yours could be the first light in this endless sky — anonymous, always.</p>
+    <button id="emptyRelease" class="btn primary big" type="button">Release your dream ✦</button>
+  </div>
+</section>
+
+<div id="tooltip" class="tooltip" role="status"></div>
+
+<aside id="detail" class="sheet" aria-hidden="true">
+  <button class="sheet-close" id="detailClose" type="button" aria-label="Close">×</button>
+  <p class="eyebrow" id="dMood"></p>
+  <h2 id="dTitle"></h2>
+  <p class="alias" id="dAlias"></p>
+  <p class="body" id="dBody"></p>
+  <div class="meta-row">
+    <span id="dLucidity"></span><span id="dRes"></span><span id="dDate"></span>
+  </div>
+  <button id="resonateBtn" class="btn primary wide" type="button">💗 Resonate — make it burn brighter</button>
+  <h3>Nearby in this constellation</h3>
+  <div id="dNearby" class="nearby"></div>
+</aside>
+
+<section id="river" class="river" hidden>
+  <div class="river-head">
+    <div><h2>The Dream Current</h2><p class="river-sub">A river of dreams flowing through the galaxy itself — hover to pause and read, drag to pull the current, scroll to stir it, click a card to turn that star toward you.</p></div>
+    <div class="river-controls">
+      <span class="mini-globe" aria-hidden="true"><span class="orbit o1"></span><span class="orbit o2"></span><span class="core-star">✦</span></span>
+      <button id="flowShuffle" class="btn ghost" type="button">🔀 Shuffle the current</button>
+      <button id="flowToggle" class="btn ghost" type="button">⏸ Pause the current</button>
+      <button id="riverClose" class="btn ghost" type="button">← Back to the galaxy</button>
+    </div>
+  </div>
+  <div id="riverFlow" class="river-flow">
+    <svg id="currentSvg" class="current-svg" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="currentGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#7c5cff" stop-opacity="0"/><stop offset=".5" stop-color="#a78bfa" stop-opacity=".8"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path id="currentPathGlow" class="current-path glow" fill="none"/>
+      <path id="currentPath" class="current-path" fill="none"/>
+    </svg>
+    <div id="flowPool"></div>
+    <p id="flowEmpty" class="flow-empty" hidden>No dreams match — try another mood or search.</p>
+  </div>
+</section>
+
+<dialog id="releaseDialog">
+  <form id="releaseForm" method="dialog">
+    <button class="sheet-close" id="releaseClose" type="button" aria-label="Close">×</button>
+    <p class="eyebrow">Anonymous · No name, no account</p>
+    <h2>Release your dream into the sky</h2>
+    <label>Title <input id="fTitle" required minlength="2" maxlength="90" placeholder="The Ocean Was in My Kitchen"></label>
+    <label>Your dream <textarea id="fBody" required minlength="10" maxlength="2400" rows="6" placeholder="Tell it exactly as you remember it…"></textarea></label>
+    <label>Mood constellation
+      <select id="fMood" required></select>
+    </label>
+    <label>Lucidity <span id="lucidVal">3</span> / 5
+      <input id="fLucid" type="range" min="1" max="5" value="3">
+    </label>
+    <p id="formError" class="error" role="alert"></p>
+    <button class="btn primary wide" type="submit">✦ Let it become a star</button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status"></div>
+<script src="app.js" defer></script>
+</body>
+</html>

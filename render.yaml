@@ -1,0 +1,19 @@
+# Render Blueprint — deploy: render.com → New + → Blueprint → pick this repo.
+# NOTE: the FREE instance has NO persistent disk, so dreams submitted by
+# visitors reset to the 8 starter dreams whenever the service spins down
+# or redeploys. For a permanent sky, use a paid instance + persistent disk
+# mounted at /data (set DATA_DIR=/data), or any VPS (see DEPLOY.md).
+services:
+  - type: web
+    name: dream-constellation
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MODERATION
+        value: hold
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: BACKUP_INTERVAL_MIN
+        value: "60"

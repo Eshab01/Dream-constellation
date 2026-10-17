@@ -1,0 +1,35 @@
+# Fly.io config for Constellation of Strangers' Dreams
+# First deploy:  fly launch --no-deploy --name <your-app-name>  (or edit `app` below)
+#                fly volumes create dream_data --size 1 --region bom
+#                fly secrets set ADMIN_TOKEN=<long-random-secret>   # only if using hold-for-review
+#                fly deploy
+# Full walkthrough in DEPLOY.md.
+
+app = "dream-constellation"
+primary_region = "bom" # Mumbai — closest Fly region to India; change if your audience is elsewhere
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "4173"
+  DATA_DIR = "/data"
+  TRUST_PROXY = "1"
+  # To hold new dreams for review instead of publishing instantly, uncomment
+  # the next line and set ADMIN_TOKEN as a secret (never in this file):
+  # MODERATION = "hold"
+
+[http_service]
+  internal_port = 4173
+  force_https = true
+  auto_stop_machines = false # a sleeping galaxy is a bad first impression — keep it always-on
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "dream_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
